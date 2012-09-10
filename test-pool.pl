@@ -30,11 +30,7 @@
      my ($cgi) = @_;   # CGI.pm object
      return if !ref $cgi;
      my $exit = 0; my $i = 0;
-     $SIG{'KILL'} = sub { $exit =1; #threads->exit(); 
-};     
-     
-     my $who = $cgi->param('name');
-     
+     $SIG{'KILL'} = sub { $exit =1 };     
      
      print $cgi->header(
          -nph => 1,

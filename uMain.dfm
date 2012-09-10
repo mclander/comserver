@@ -42,23 +42,12 @@ object Form1: TForm1
   end
   object Memo2: TMemo
     Left = 12
-    Top = 56
-    Width = 529
-    Height = 385
+    Top = 44
+    Width = 485
+    Height = 397
     Lines.Strings = (
       'Memo2')
     TabOrder = 3
-  end
-  object eUrl: TEdit
-    Left = 12
-    Top = 12
-    Width = 481
-    Height = 21
-    TabOrder = 4
-    Text = 
-      'http://www.rtsportscast.com:8080/comserver/recieve?formattername' +
-      '=xml&userid=2&token=b6q15DSLNwQmH7kcxphueSdN3hCycCXFMmRdrA==&mat' +
-      'ches=1,2,3,4,5,6,7'
   end
   object Button3: TButton
     Left = 520
@@ -66,7 +55,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'Button3'
-    TabOrder = 5
+    TabOrder = 4
     OnClick = Button3Click
   end
   object Button4: TButton
@@ -75,8 +64,23 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'Button4'
-    TabOrder = 6
+    TabOrder = 5
     OnClick = Button4Click
+  end
+  object ComboBox1: TComboBox
+    Left = 12
+    Top = 12
+    Width = 485
+    Height = 21
+    ItemHeight = 13
+    TabOrder = 6
+    Text = 'http://tech02:8080/'
+    Items.Strings = (
+      
+        'http://www.rtsportscast.com:8080/comserver/recieve?formattername' +
+        '=xml&userid=2&token=b6q15DSLNwQmH7kcxphueSdN3hCycCXFMmRdrA==&mat' +
+        'ches=1,2,3,4,5,6,7'
+      'http://tech02:8080/')
   end
   object tcpTest: TTcpClient
     RemoteHost = 'www.rtsportscast.com'

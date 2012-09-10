@@ -12,11 +12,11 @@ type
     Button1: TButton;
     Button2: TButton;
     Memo2: TMemo;
-    eUrl: TEdit;
     Button3: TButton;
     tcpTest: TTcpClient;
     WebDispatcher1: TWebDispatcher;
     Button4: TButton;
+    ComboBox1: TComboBox;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure tcpTestConnect(Sender: TObject);
