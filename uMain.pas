@@ -3,21 +3,15 @@ unit uMain;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, LongPool, HTTPApp, Sockets;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, StrUtils,
+  Dialogs, StdCtrls, HTTPApp, Sockets, RegExpr, LongPool;
 
 type
   TForm1 = class(TForm)
-    Memo1: TMemo;
-    Button1: TButton;
-    Button2: TButton;
     Memo2: TMemo;
     Button3: TButton;
-    tcpTest: TTcpClient;
-    WebDispatcher1: TWebDispatcher;
-    Button4: TButton;
-    ComboBox1: TComboBox;
-    procedure Button1Click(Sender: TObject);
+    cbUrl: TComboBox;
+    TcpClient1: TTcpClient;
     procedure Button2Click(Sender: TObject);
     procedure tcpTestConnect(Sender: TObject);
     procedure tcpTestReceive(Sender: TObject; Buf: PAnsiChar;
@@ -25,9 +19,10 @@ type
     procedure tcpTestDisconnect(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
-    test : TLongPool;
+    test : TComet;
   public
     { Public declarations }
   end;
@@ -39,15 +34,9 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm1.Button1Click(Sender: TObject);
-begin
-  test := TLongPool.create(memo1);
-
-end;
-
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-  test.SetI(1);
+//  test.SetI(1);
 end;
 
 procedure TForm1.tcpTestConnect(Sender: TObject);
@@ -66,24 +55,29 @@ begin
   memo2.Lines.Add('connected');
 end;
 
+function Notify(var rec: TCometRec):boolean;
+begin
+  result:= true;
+end;
+
 procedure TForm1.Button3Click(Sender: TObject);
 begin
-  tcpTest.Active := True;
-  tcpTest.sendLn('GET /comserver/recieve?formattername=xml&userid=2&token=b6q15DSLNwQmH7kcxphueSdN3hCycCXFMmRdrA==&matches=1,2,3,4,5,6,7 HTTP/1.1');
-  tcpTest.sendLn('Host: www.rtsportcast.com:8080');
-  tcpTest.sendLn('User-Agent: Mozilla/5.0 (X11; U; Linux i686; ru; rv:1.9b5) Gecko/2008050509 Firefox/3.0b5');
-  tcpTest.sendLn('Accept: text/html');
-  tcpTest.sendLn('Connection: keep-alive');
-  tcpTest.sendLn('');
-  tcpTest.sendLn('');
-
-
+  test := TComet.create(self, cbUrl.Text, Notify , Memo2);
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 begin
-  memo2.Lines.Add(tcpTest.Receiveln());
+//  memo2.Lines.Add(tcpTest.Receiveln());
 
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  try
+    test.suspend;
+    test.Free;
+  except
+  end;
 end;
 
 end.
