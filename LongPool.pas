@@ -18,7 +18,7 @@ TCometRec = class
     id : integer;
     parent : integer;
     match : integer;
-    tp : integer;
+    tp : string;
     key : string;
     value : string;
     time : Tdatetime;
@@ -29,7 +29,7 @@ end;
 TComet = class(TThread)
   private
     poolConnected : boolean;
-    debug_memo: TMemo;
+    //debug_memo: TMemo;
     pool : TTcpClient;
     NotifyProc : TCometNotify;
     // data: TObjectList; // TRCometRec
@@ -37,11 +37,12 @@ TComet = class(TThread)
     buffer_str : string;
     r_json : TregExpr;
 
-    procedure TcpClientDisconnect(Sender: TObject);
+    // procedure TcpClientDisconnect(Sender: TObject);
 
   public
-    i :integer;
-    constructor Create(owner:Tcomponent; uri:string;  proc:TcometNotify; var memo:TMemo);
+
+    blankCount : integer;
+    constructor Create(owner:Tcomponent; uri:string;  proc:TcometNotify);
     destructor Destroy;  override;
 
    protected
@@ -56,12 +57,30 @@ end;
 
 implementation
 
+function GetJSonVal(js: TlkJSONobject; name : string):string;
+var idx : integer;
+begin
+  idx := js.IndexOfName(name);
+  if idx >0 then
+    result := vartostr(js.FieldByIndex[idx].Value)
+  else result := '';
+
+end;
+
 constructor TCometRec.Create(DataStr: string; Format: TCometFormat = JSONFormat);
 var   js:TlkJSONobject;
 begin
   if Format <> JSONFormat then raise TCometException.Create('Only JSON format implemented now');
   js := TlkJSON.ParseText(DataStr) as TlkJSONobject;
-  id := StrToInt(VarToStr(js.Field['id'].Value));
+//  {"m":"Subscribed to matches=168320,","t":"servermessageplayer","tp":"Info","k":"","p":"","i":"","servertime":"2012-09-06 18:00:57.871"}
+
+  id     := StrToIntDef(GetJSonVal(js,'i'),-1);
+  tp     := GetJSonVal(js,'tp');
+  parent := StrToIntDef(GetJSonVal(js,'p'),-1);
+  match  := StrToIntDef(GetJSonVal(js,'t'),-1);
+  key    := GetJSonVal(js,'k');
+  value  := GetJSonVal(js,'m');
+  time   := StrToDatetimeDef(GetJSonVal(js,'servertime'),0);
 end;
 
 destructor Tcomet.Destroy;
@@ -74,17 +93,18 @@ begin
 end;
 
 //constructor Tcomet.Create(owner);
-constructor Tcomet.Create(owner:Tcomponent; uri:string;  proc:TcometNotify; var memo:TMemo);
+constructor Tcomet.Create(owner:Tcomponent; uri:string;  proc:TcometNotify);
 var s : string;
     r : TRegExpr;
     uri_ok : boolean;
 begin
   inherited Create(true);
 
+  last_id := -1;
+
   r_json := TRegExpr.Create;
   r_json.Expression := '(?im)<script.*?>parent.push\(''({.*?})\''\)</script>';
 
-  debug_memo := memo;
   NotifyProc := proc;
 
   uri_ok := false;
@@ -120,12 +140,11 @@ begin
    pool.RemoteHost := host;
    pool.RemotePort := IntToStr(port);
    pool.BlockMode  := bmblocking;
-   pool.OnDisConnect := TcpClientDisconnect;
+   // pool.OnDisConnect := TcpClientDisconnect;
 
    Reconnect;
    self.Resume;
 
-   i :=1;
 end;
 
 procedure Tcomet.Reconnect;
@@ -143,25 +162,34 @@ end;
 
 procedure Tcomet.Execute;
 var str :string;
+    rec: TcometRec;
 begin
-  // pool := TTcpClient.Create(self);
-  while True do begin
+  // условие выхода
+  blankCount := 0;
+  while  not self.Suspended and not self.Terminated do begin
     str := pool.Receiveln();
-    // if str='' then raise TCometException.Create('WTF');
-    if r_json.Exec(str) then begin
-      if not (debug_memo = nil) then
-        debug_memo.Lines.Add(IntToStr(i)+'. '+r_json.Match[1]);
-      inc(i);
+    if str = '' then  begin
+      inc(blankCount);
+      if blankCount > 10 then Reconnect;
+    end else blankCount := 0;
+
+    if r_json.Exec(str) and not self.Suspended and not self.Terminated then begin
+
+//      if not (self.debug_memo = nil) then
+//        debug_memo.Lines.Add(r_json.Match[1]);
+
+      if not(@NotifyProc = nil) then begin
+        try
+          rec := TCometRec.Create(r_json.Match[1]);
+          if (rec.id <0) or (rec.id > last_id) then
+            if self.NotifyProc(rec) then last_id := rec.id;
+        except
+        end;
+      end;
+
     end;
   end;
 end;
-
-procedure Tcomet.TcpClientDisconnect(Sender: TObject);
-begin
-  raise TCometException.Create('WTF');
-end;
-
-
 
 end.
 

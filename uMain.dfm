@@ -14,7 +14,7 @@ object Form1: TForm1
   OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
-  object Memo2: TMemo
+  object mOut: TMemo
     Left = 12
     Top = 44
     Width = 485
