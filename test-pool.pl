@@ -51,7 +51,7 @@
 		print_chunk($line);	
 		binmode STDOUT;
 		warn $i.' '.$line;$i++;
-		sleep(2);
+		sleep(1);
 	}
 #           $cgi->start_html("Hello"),
 #           $cgi->h1("Hello $who!"),

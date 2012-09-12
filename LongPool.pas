@@ -34,7 +34,9 @@ TCometRec = class
     value : string;
     serverTime : Tdatetime;
     clientTime : TDateTime;
-    constructor Create(DataStr: string; Format: TCometFormat = JSONFormat);
+    procedure SetFromData(DataStr: string; Format: TCometFormat = JSONFormat);
+//    constructor Create(js : TlkJSONobject);
+    procedure SetFromJSON(js : TlkJSONobject);
 end;
 
 
@@ -114,12 +116,17 @@ begin
 
 end;
 
-constructor TCometRec.Create(DataStr: string; Format: TCometFormat = JSONFormat);
+procedure TCometRec.SetFromData(DataStr: string; Format: TCometFormat = JSONFormat);
 var js:TlkJSONobject;
     s : string;
 begin
   if Format <> JSONFormat then raise TCometException.Create('Only JSON format implemented now');
   js := TlkJSON.ParseText(DataStr) as TlkJSONobject;
+  SetFromJSON(js);
+end;
+
+procedure TCometRec.SetFromJSON(js : TlkJSONobject);
+begin
   id          := StrToIntDef(GetJSonVal(js,'i'),-1);
   tp          := GetJSonVal(js,'tp');
   parent      := StrToIntDef(GetJSonVal(js,'p'),-1);
@@ -205,9 +212,9 @@ var
 begin
   if (last_id > 0) and (coURIWithLastId in option_list) then begin
     r_last_id := TRegExpr.Create();
-    r_last_id.Expression := '^(.*?)last_id=(\d+)(.*?)$';
+    r_last_id.Expression := '^(.*?)lastid=(\d+)(.*?)$';
     if r_last_id.Exec(path) then
-      path := r_last_id.Match[1]+'last_id='+inttostr(last_id)+r_last_id.Match[3]
+      path := r_last_id.Match[1]+'lastid='+inttostr(last_id)+r_last_id.Match[3]
     else
       if pos('?', path)>0 then path := path + '&last_id='+inttostr(last_id)
                           else path := path + '?last_id='+inttostr(last_id);
@@ -267,7 +274,8 @@ begin
 
       if not(@NotifyProc = nil) then begin
         try
-          rec := TCometRec.Create(r_json.Match[1]);
+          rec := TCometRec.Create();
+          rec.SetFromData(r_json.Match[1]);
           self.last_server_time := rec.serverTime;
           self.last_client_time := Now;
           if ((coNotifyBlank in self.option_list) and  (rec.id <0)) or (rec.id > last_id) then
