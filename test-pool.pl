@@ -15,6 +15,8 @@
  sub handle_request {
      my $self = shift;
      my $cgi  = shift;
+
+     warn "\n".$cgi->path_info()."\n";
      $thr->kill('KILL') if ($thr);
      $thr = threads->create(resp_hello,$cgi);
  }
@@ -49,7 +51,7 @@
 		print_chunk($line);	
 		binmode STDOUT;
 		warn $i.' '.$line;$i++;
-		sleep(1);
+		sleep(2);
 	}
 #           $cgi->start_html("Hello"),
 #           $cgi->h1("Hello $who!"),

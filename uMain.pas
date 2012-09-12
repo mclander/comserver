@@ -30,13 +30,23 @@ implementation
 
 function Notify(var rec: TCometRec):boolean;
 begin
-  Form1.mOut.Lines.Add(inttostr(rec.id));
+  Form1.mOut.Lines.Add(
+    'id: '+ inttostr(rec.id)+
+    ', at: '+DateTimeTostr(rec.servertime)+
+    ', delay in sec: '+FloatTostr(ServerDelta(rec.clientTime,rec.serverTime))
+  );
   result:= true;
+end;
+
+procedure ConnectNotify(connected: boolean; LastId:integer; LastServerTime: TDateTime);
+begin
+  if connected then Form1.mOut.Lines.Add('CONNECTED at: '+DateTimeTostr(LastServerTime))
+               else Form1.mOut.Lines.Add('DISCONNECTED at: '+DateTimeTostr(LastServerTime));
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
 begin
-  test := TComet.create(self, cbUrl.Text, Notify);
+  test := TComet.create(self, cbUrl.Text, Notify, ConnectNotify, [coURIWithLastId]);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
