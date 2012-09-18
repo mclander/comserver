@@ -7,8 +7,10 @@
  
  use threads;
  use File::Slurp;
+ open FH, '<comserver.html';
 
- my @data = split (/\<script/, scalar( read_file ("comserver.html")));
+ my @data = split (/\<script/, join('', <FH>));
+ close FH;
 
  my $thr = undef;
 
