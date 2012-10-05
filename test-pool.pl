@@ -7,7 +7,7 @@
  
  use threads;
  use File::Slurp;
- open FH, '<comserver.html';
+ open FH, '<match1.html';
 
  my @data = split (/\<script/, join('', <FH>));
  close FH;
