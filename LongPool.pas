@@ -212,12 +212,12 @@ var
 begin
   if (last_id > 0) and (coURIWithLastId in option_list) then begin
     r_last_id := TRegExpr.Create();
-    r_last_id.Expression := '^(.*?)lastid=(\d+)(.*?)$';
+    r_last_id.Expression := '^(.*?)eventid=(\d+)(.*?)$';
     if r_last_id.Exec(path) then
-      path := r_last_id.Match[1]+'lastid='+inttostr(last_id)+r_last_id.Match[3]
+      path := r_last_id.Match[1]+'eventid='+inttostr(last_id)+r_last_id.Match[3]
     else
-      if pos('?', path)>0 then path := path + '&last_id='+inttostr(last_id)
-                          else path := path + '?last_id='+inttostr(last_id);
+      if pos('?', path)>0 then path := path + '&eventid'+inttostr(last_id)
+                          else path := path + '?eventid='+inttostr(last_id);
 
   end;
 
