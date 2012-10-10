@@ -57,6 +57,7 @@ begin
   Form1.mOut.Lines.Add(
     'id: '+ inttostr(rec.id)+
     ', at: '+DateTimeTostr(rec.servertime)+
+    ', k: '+rec.key+
     ', delay in sec: '+FloatTostr(ServerDelta(rec.clientTime,rec.serverTime))
   );
   result:= true;

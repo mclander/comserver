@@ -216,7 +216,7 @@ begin
     if r_last_id.Exec(path) then
       path := r_last_id.Match[1]+'eventid='+inttostr(last_id)+r_last_id.Match[3]
     else
-      if pos('?', path)>0 then path := path + '&eventid'+inttostr(last_id)
+      if pos('?', path)>0 then path := path + '&eventid='+inttostr(last_id)
                           else path := path + '?eventid='+inttostr(last_id);
 
   end;
@@ -272,18 +272,22 @@ begin
     // всё хорошо - разбираем JSONчик
     if r_json.Exec(str) and not self.Suspended and not self.Terminated then begin
 
-      if not(@NotifyProc = nil) then begin
-        try
-          rec := TCometRec.Create();
-          rec.SetFromData(r_json.Match[1]);
-          self.last_server_time := rec.serverTime;
-          self.last_client_time := Now;
-          if ((coNotifyBlank in self.option_list) and  (rec.id <0)) or (rec.id > last_id) then
+      repeat
+       if not(@NotifyProc = nil) then begin
+          try
+            rec := TCometRec.Create();
+            rec.SetFromData(r_json.Match[1]);
+            self.last_server_time := rec.serverTime;
+            self.last_client_time := Now;
+            if ((coNotifyBlank in self.option_list) and  (rec.id <0)) or (rec.id > last_id) then begin
               ret := self.NotifyProc(rec);
               if (ret or (coIgnoreAnswer in option_list)) and (rec.id>0) then last_id := rec.id;
-        except
+            end else
+              rec.Free;
+          except
+          end;
         end;
-      end;
+      until not r_json.ExecNext;
 
     end;
   end;
