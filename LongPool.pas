@@ -272,8 +272,8 @@ begin
     // всё хорошо - разбираем JSONчик
     if r_json.Exec(str) and not self.Suspended and not self.Terminated then begin
 
-      repeat
-       if not(@NotifyProc = nil) then begin
+      if not(@NotifyProc = nil) then
+        repeat
           try
             rec := TCometRec.Create();
             rec.SetFromData(r_json.Match[1]);
@@ -286,8 +286,7 @@ begin
               rec.Free;
           except
           end;
-        end;
-      until not r_json.ExecNext;
+        until not r_json.ExecNext;
 
     end;
   end;
